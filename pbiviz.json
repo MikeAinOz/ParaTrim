@@ -1,0 +1,23 @@
+{
+  "visual": {
+    "name": "ParaTrim1.0.0",
+    "displayName": "ParaTrim1.0.0",
+    "guid": "filterAgeDF6D7E350E674FBFBD01E44EB2776482",
+    "visualClassName": "ParaTrim",
+    "version": "3.1.0",
+    "description": "Frequency filter for highlighting outliers",
+    "supportUrl": "smith11041104t@mail.com",
+    "gitHubUrl": ""
+  },
+  "apiVersion": "2.6.0",
+  "author": {
+    "name": "Dmitry Vann",
+    "email": "smith11041104@mail.com"
+  },
+  "assets": {
+    "icon": "assets/icon.png"
+  },
+  "externalJS": [],
+  "style": "style/visual.less",
+  "capabilities": "capabilities.json"
+}

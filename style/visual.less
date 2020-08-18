@@ -1,0 +1,204 @@
+p {
+    font-size: 20px;
+    font-weight: bold;
+    em {
+        background: yellow;
+        padding: 5px;
+        
+    }
+}
+
+.xAxis path {
+    display: none;
+}
+
+.helpLink {
+    position: absolute;
+    top: 0px;
+    right: 12px;
+    display: block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #80B0E0;
+    border-radius: 20px;
+    color: #80B0E0;
+    text-align: center;
+    font-size: 16px;
+    line-height: 20px;
+
+    &.hidden {
+        display: none;
+    }
+}
+
+.LandingPage {
+    position: absolute;
+    text-align: center;
+    top: 12px;
+    font-size: 12pt;
+    right: 15px;
+}
+
+.LandingPageHelpLink {
+    position: absolute;
+    text-decoration: underline;
+    top: 50px;
+    font-size: 12pt;
+    right: 15px;
+}
+
+.mainDiv {
+    padding: 10px;
+}
+
+.inputDiv {
+    width: 25%;
+    margin: 0 2%;
+    float: left;
+}
+
+.inputLabel {
+    display: block;
+    text-align: center;
+    padding: 10px;
+}
+
+.inputBox {
+    width: 95%;
+    height: 20px;
+    text-align: center;
+    border: 1px solid black;
+}
+
+.slidecontainer {
+    width: 60%; /* Width of the outside container */
+    float: left;
+  }
+
+
+//Some basic setup first
+* {box-sizing: border-box;}
+
+body {
+  font-family: sans-serif;
+  font-size: 10px;
+  line-height: 10px;
+  color: black;
+  background: white;
+}
+
+
+//Some range styling.
+//Using mixins because each major browser needs a separate selector to style parts of the range input, combining selectors would invalidate the whole selector on each browser
+
+input[type=range] {
+  -webkit-appearance: none;
+  display: block;
+  margin: 0;
+  width: 100%;
+  background: transparent;
+}
+input[type=range]::-webkit-slider-runnable-track {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  color: transparent;
+  background: lightgray;
+  border-radius: 999px;
+  border: none;
+}
+input[type=range]::-moz-range-track {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  color: transparent;
+  background: lightgray;
+  border-radius: 999px;
+  border: none;
+}
+input[type=range]::-ms-track {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 20px;
+  color: transparent;
+  background: lightgray;
+  border-radius: 999px;
+  border: none;
+}
+input[type=range]::-ms-fill-lower {
+  display: none;
+}
+input[type=range]::-ms-fill-upper {
+  display: none;
+}
+input[type=range]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 30px;
+  background: black;
+  box-shadow: 0px 2px 10px -2px black(1);
+}
+input[type=range]::-moz-range-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 30px;
+  background: black;
+  box-shadow: 0px 2px 10px -2px black(1);
+}
+input[type=range]::-ms-thumb {
+  -webkit-appearance: none;
+  height: 20px;
+  width: 20px;
+  border-radius: 30px;
+  background: black;
+  box-shadow: 0px 2px 10px -2px black(1);
+}
+
+
+
+
+//And now the ticks
+.ticks {
+  display: flex;
+  justify-content: space-between;
+  
+  //We need left & right padding that's half the width of the range thumb, so all ticks align with the center of the thumb
+  padding: 5px 10px;
+}
+.tick {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  width: 1px;
+  background: gray;
+  
+  //Cap the height of the tick & push text down, so the tick renders as a little line and the text doesn't overlap the line. Also add margin, so the container expands enough that the next element you'll add won't overlap the ticks.
+  height: 5px;
+  line-height: 50px;
+  font-size: 10px;
+  margin-bottom: 20px;
+}
+
+
+  .container1 {
+    text-align: center;
+  }
+
+  .titleDiv {
+      display: inline-block;
+  }
+
+  .titleLabel {
+    float: left;
+    margin-left: 100px;
+  }
+
+  .titleImage {
+    display: block;
+    width: 50px;
+    height: 50px;
+    float: right;
+    margin-left: 50px;
+  }
