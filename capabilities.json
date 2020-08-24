@@ -137,5 +137,11 @@
             "Tooltips"
         ]
     },
-    "supportsLandingPage": false
+    "supportsLandingPage": false,
+    "supportsHighlight": true,
+    "suppressDefaultTitle": true,
+    "supportsSynchronizingFilterState": true,
+    "sorting": {
+        "default": {}
+    }
 }
