@@ -287,6 +287,7 @@ export class ParaTrim implements IVisual {
     private rminValue: number;
     private lowerLimit: number;
     public static startFlag: boolean;
+    private inversionFlag: number;
 
     private barSelection: d3.Selection<d3.BaseType, any, d3.BaseType, any>;
 
@@ -316,6 +317,7 @@ export class ParaTrim implements IVisual {
         this.element = options.element;
         this.selectionManager = options.host.createSelectionManager();
         this.locale = options.host.locale;
+        this.inversionFlag = 1;
         ParaTrim.startFlag = true;
 
         this.selectionManager.registerOnSelectCallback(() => {
@@ -342,26 +344,34 @@ export class ParaTrim implements IVisual {
 
     }
 
+    public apply() {
+        let that = this, flag = this.inversionFlag;
+        console.log(this.barSelectionMerged);
+        // this.handleClick(this.barSelectionMerged);
+        this.barSelectionMerged.each((d) => {
+            let age = Number(d.category), ff = false;
+            if (flag === 1 && ((age - that.maxValue) >= 0 || (age - that.minValue) <= 0)) ff = true;
+            else if(flag === - 1 && age >= that.minValue && age <= that.maxValue) ff = true;
+            if (ff) {
+                console.log(age, that.maxValue, that.minValue);
+                that.selectionManager
+                    .select(d.selectionId, true)
+                    .then((ids: ISelectionId[]) => {
+                        that.syncSelectionState(that.barSelectionMerged, ids);
+                    });
+            }
+        });
+
+    }
+
     public isCheck(sel) {
-        let that = this, flag = 1;
-        if (d3Select(".checkedInversion").property('checked')) flag = -1;
-        if (d3Select(".checkedApply").property('checked')) {
-            this.handleClick(this.barSelectionMerged);
-            this.barSelectionMerged.each((d) => {
-                let age = Number(d.category), ff = false;
-                if (flag === 1 && ((age - that.maxValue) >= 0 || (age - that.minValue) <= 0)) ff = true;
-                else if(flag === - 1 && age >= that.minValue && age <= that.maxValue) ff = true;
-                if (ff) {
-                    that.selectionManager
-                        .select(d.selectionId, true)
-                        .then((ids: ISelectionId[]) => {
-                            that.syncSelectionState(that.barSelectionMerged, ids);
-                        });
-                }
-            });
-        } else {
-            this.handleClick(this.barSelectionMerged);
-        }
+        this.inversionFlag = 1;
+        this.apply();
+    }
+
+    public invert(sel) {
+        this.inversionFlag = -this.inversionFlag;
+        this.apply();
     }
 
     public sliderChange(sel, flag) {
@@ -391,26 +401,20 @@ export class ParaTrim implements IVisual {
         d3Select(".maxValue").attr("value", this.upperLimit.toFixed(0));
         d3Select(".slider1").property("value", this.upperLimit);
         d3Select(".slider2").property("value", this.lowerLimit);
+        this.handleClick(this.barSelectionMerged);
     }
 
     public createLayout() {
         let that = this;
         this.mainDiv.selectAll("*").remove();
-        let container1 = this.mainDiv.append("div").classed('container', true).classed('container1', true);
-        let titleDiv = container1.append("div").classed("titleDiv", true);
-        titleDiv.append("h2").text("ParaStat").classed("titleLabel", true);
-        titleDiv.append("img").classed("titleImage", true).attr("src", "data:image/jpeg;base64, iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyZpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMTQ1IDc5LjE2MzQ5OSwgMjAxOC8wOC8xMy0xNjo0MDoyMiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTkgKFdpbmRvd3MpIiB4bXBNTTpJbnN0YW5jZUlEPSJ4bXAuaWlkOjlDMUMyMTI5RERERDExRUFCNDU2RTNCMjg4RjgyMEREIiB4bXBNTTpEb2N1bWVudElEPSJ4bXAuZGlkOjlDMUMyMTJBRERERDExRUFCNDU2RTNCMjg4RjgyMEREIj4gPHhtcE1NOkRlcml2ZWRGcm9tIHN0UmVmOmluc3RhbmNlSUQ9InhtcC5paWQ6OUMxQzIxMjdEREREMTFFQUI0NTZFM0IyODhGODIwREQiIHN0UmVmOmRvY3VtZW50SUQ9InhtcC5kaWQ6OUMxQzIxMjhEREREMTFFQUI0NTZFM0IyODhGODIwREQiLz4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz6hStnfAAAKYklEQVR42uydeWwcVx3HvzOzh+1dr+3EwfGROE6rchjUpg2FpAFRWhBIHAVKAYFoACFxo0q0iHIVItQ/kBASauAvCoKCOCpA/AG0quhFoIEeQEWVQoMT20mT2l57d732HrPD7zczNms73n1zeWaz7yf9JNvrfe/NfOZ3vfdmRhm87R+Q4kiSpK8hfSvpq0gvsf+WJX2G9AHS+0j/7qZxRQJxJB8n/QrpToH/PUZ6O+lDTjpQ5TkWkn2kT5AeFYTBcpD0QdK7SRMSiH9yjQ1jn8vvHyb9s+3WJBCP8krSR31o50rSxyUQb9JB+nsf2xsn/b4E4l7uIN3mc5sfsjMzCcShjJB+PqC2j0ogzuXGANvmeDIqgTiTtwTc/gclEHHpIX1dwH28VAJxdrK0gPvolUDEpXsL+khKIOJS2oI+KhKIuDy7BX3kJBBxeR6C0xweZEICcSa/Dbj9n0ggzuTeANueJH1KAnEmT5PeE1Dbn2z0oQSyudwSQJt/bOYOJZDN5QXSm3xsr0D67mb/JIE0ll+QfsSHdvKkV5HOSiDehReV3mOfVDfyF1gzvEL1jQQiJj8nvYz0hw6+w9uCPkV6gPQ/ol+KyXPtqGA8THon6dth7csagrWqyJORy6QzpCdIf0b6O9IFp53IfVneJWV7mjJ8mAeTFuJdFv1sTMaQiIkEIoFIkUBaSFolqPOuv/fB2l+bDHEcXFv8mPQ3Av97K+kb1l30nAA8Bmvi8lSrpr2c098UsTF9g/RLDT7nk351g8910rtIP9tKLouLrQciCIPli6TfvMDfkwIwVo7tM7jAukuUgfABvz7C4/ucbSn18ogAjHp5J6z9vpEHwvuWPt0Cse1223X1k/4V1u0LTuXO+rgYVSA3tFDCcYT036T7XX5/gPTQKpBazQBrxOSSFstWez1+f9dq2lss6agyFMNAbyoOTVVghM/nhTYrP7pWLeSjbxrDLTdciteO9+NctoRcsQpVUcIe4K/bDEhm1UKu2NuLRBx4+WgGewZS+NWxaUzPFNGXSaIroZmWE4KctlPCd7UJkNU7e2Nz+bJ50hMxFddd3o/x3Rnc/+Q5PPz0DKbps+2ZBDrioYD5GOmrSYfbAMjYmiyLXVRVN3BmroRMVww3X78Lt934Yhwa345ypWZaTLlag6puqSubsTOXJ9sAyGpQV759fO0il2kIdN63peNIxhX863QBx56ZxfFns8gVytjR10EuTt3qzOwwrJtodgaYDnPb4yEB4YuPl4MrG4DUg+HY3pdOINUBPHUyj0fIjT3+3DwKxQp29CSQ0BToXlyZCV+BokaiHNpvF3dhSM0Gcm7Tq20l0eIYM5cHLhvuxuVj3XjiuRwe+ucMTp4rosruTnPvxggFga/BKJes3+LxMIHoIfbNV2R3QyDrwczmyubP47syOHBpBt99rIBHp3T0d3qIK9wgWVitVEJ1YZ50gayFwSTCOCnFkC3UvHMr5uTcmc6OwCClIpmMQ6HMTIl5CfSWX4x1dkHr7kYs02OC0fN5y5XFY1ZA2xrJrzjRlgBSD0angF6tkoXXdBg17+M3quT8KI7E+vqgERS9kEd1bhb64iIZkGHFGO7YvCqMdTwV87s+yBysO5t6QgIy6ApIILLqupbpZ9W0FC2Vgl4smtZSW14i+DUTDupmERgGw6xRDFJica/JAW90mwoRyJ7oAKkL8yaYsgWG3ZiWTlsWREA2TLIRAEPXUZ2fN10dxyJODDyAmQwx9R2NIJC1YIxyedWCFE2zLaneYxlQCUBycAjxbX2ozM6hmlsgi1qGkkhY33GWlk+GeNC7IwxkY1FkbHJiDXZlzIwys+TQsBmHdMrWTItZWnIKZiLsav2i2UrKbo1SDajJJLShIWg9lLFls2Qx8zAqFavGaQ4lTCD8BKLERbcvywzylAQwmOTICDr37DWtx3J/TTPC6RCH3ke67SLdKGdnXxRLtFQaiYEBM96Qf2v2xVy4gRMZ1y5Lr/k2EN4S81VYT/F0Kudh7W/606bjJGuJZTKkvdDJfTWZBSiEXa27AkIFujkbVqwYeFEXTzB6gsE79V7m4SB4R+N7YW2ou2BCYI65l4Dkc/+fNd28Wq8hvM0faccd8+EtU1lwaCSGHQRjZsmAh/nFIx5hrMhdjQKEUdWhcrZFajR2W3O2hiXDrq6EhZKBvb0KPnFlEh1kY/P0u8u1q+t8OhBek04JzQg0lrJdrYclY66A8Mk/v2jgJdsVfPgVCZR1y2pcMPFrhrXU1M2wqxKrRcIsDkdd+0q+2M7kDVwxoOGNYzHTatzkBn5lu1hTw3sCcjLMat1T8GJvnCMQ1+7WMJBSUKhEtdA3rDkuzrCaLz0/H2Yt4gkIu6h82UB/l4r9OzXML9egKpFEwkubolMoYdYiac/pHbsuhnL1oIaRbjWyVuLAZYUJpMeXfJvd1ig1dXBYQ3YpqlYifjgh9u3P1AkDmCN3dRW5LQaTL0fPOhRNNee3jOZWcj7EkWq+VaQFgrAro+Ka4QjHErGFq9MhjvCIb9PvDGCW3NU+SoOPTevIUmWQjkcMSE1oAu6snWntDHAkXHyeqPudbwb9A+lRX9dDFiuWlbDruvdEBZmEikjdeiK2q9+wrSRIIN/DxtvhrAvbV49Ax8tB/QC5rT0US3Kl6LDg2KF2JM1YIpBtBT19sul8me+zmpz2DlI2zWlwrlyDorSchWxFtX5qy4CYVmJnXEMEpkA1ihIdMxH9z6AzraktA7ISSwbTCg4MaVYK3Hp1ST7AttmRbzqBuT6od/s1+BxZxsERDcfP6ubEY3dCgRGydShaDIqqNVukYlkIcCTZRu2vWAivuPHDg6ddKL/j721rXLVtJds7FTPAL+uA0VoWEiQQngmoNbKQd5D+1EMH/EAYfhjLm1H3mjmGskRQxvtVPDypmGsmCa1lgAQZQxqu27OFfMenjm5d/4cyFSExivKdVCDqYZuIfXOQYKY1geDuF8k1AzLoU0cb6nIFTiZZtyCG8NQJ7wdu7kD5FrMzAY1kuhkQv5ZRK5tdmC0qQc1pTTQDYvjoFKItzsz1VFhA2kQcrRo2PXFBWV7bAHG4rs4S1P6sKQnEncsKYuVwSSSot5XXChlIViTtbRsxb7mOCS8BzQcwhHyz5Kd9gLBlMBBzf6+QlZwNCAgkkPVgxNNTv5fYFiQQ90DY1/u9z3dKAtlwxI4O2W8gExLIOuPgwlARX8rNSiDREr9T30kJxH0MCQKIDOobahFNdbL7xG8gixLI+lKdt8UowlMo//V5APLFkut58ENtHGyDuc/H3vldhudFgHT61KGbnbx+9R0TurhqOtRkB1XrSRg1oRVarhvu92mMXxfKymHNQPqS4QcR5AQlIXIc/KAavj1a60o7efKBH29p4HvxfyR6Eu/w6aS4ef/413zq+5ewbmkW8lpaZ4eTwM671K/1cOH+DXVvPxAx9W/Bev/FB+DuKf8cqH4Aa0e3U+G30byf9Mtw9wRr3g/Ab+G52VHay5mWqohsmFuRB2G9C/cLNpxmzw8u2u7ublgPNRCW/wkwABquNFN5dxeGAAAAAElFTkSuQmCC");
-        this.mainDiv.append("div").style("clear", "both");
         let container2 = this.mainDiv.append("div").classed('container', true).classed('container2', true);
-        this.createSlider(container2, 1);
-        this.createSlider(container2, 2);
-        let checkbox = container2.append("div").classed("checkedDiv", true).style("text-align", "right");
-        let inversionDiv = checkbox.append("div").style("padding", "10px");
-        inversionDiv.append("label").text("Inversion");
-        inversionDiv.append("input").attr("type", "checkbox").classed("checkedInversion", true);
-        checkbox.append("button").text("Apply").on("click", () => { that.isCheck(this); });
-        checkbox.append("input").attr("type", "checkbox").classed("checkedApply", true);
-        checkbox.append("div").append("button").text("Reset").on("click", () => { that.reset(); }).style("margin-top", "10px");
+        let sliderDiv = container2.append("div").classed('sliderDiv', true);
+        this.createSlider(sliderDiv, 1);
+        this.createSlider(sliderDiv, 2);
+        let checkbox = container2.append("div").classed("checkedDiv", true);
+        checkbox.append("div").classed("btn", true).append("button").classed("invert", true).text("Invert").on("click", () => { that.invert(this); });
+        checkbox.append("div").classed("btn", true).append("button").text("Apply").on("click", () => { that.isCheck(this); });
+        checkbox.append("div").classed("btn", true).append("button").text("Reset").on("click", () => { that.reset(); });
         this.mainDiv.append("div").style("clear", "both");
         let container3 = this.mainDiv.append("div").classed('container', true).classed('container3', true);
         let inputbox1 = container3.append("div").classed("inputDiv", true);

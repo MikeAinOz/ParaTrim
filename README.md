@@ -1,2 +1,1 @@
-# ParaTrim
-PowerBI Visual Frequency filter for highlighting outliers in dataset
+This visual is designed to highlight outliers based on variance from the mean and defaults to a 2SD filter. It should be used with another visual that supports highlighting such as the column chart. 
