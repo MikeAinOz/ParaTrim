@@ -346,14 +346,12 @@ export class ParaTrim implements IVisual {
 
     public apply() {
         let that = this, flag = this.inversionFlag;
-        console.log(this.barSelectionMerged);
-        // this.handleClick(this.barSelectionMerged);
+        this.handleClick(this.barSelectionMerged);
         this.barSelectionMerged.each((d) => {
             let age = Number(d.category), ff = false;
             if (flag === 1 && ((age - that.maxValue) >= 0 || (age - that.minValue) <= 0)) ff = true;
             else if(flag === - 1 && age >= that.minValue && age <= that.maxValue) ff = true;
             if (ff) {
-                console.log(age, that.maxValue, that.minValue);
                 that.selectionManager
                     .select(d.selectionId, true)
                     .then((ids: ISelectionId[]) => {
